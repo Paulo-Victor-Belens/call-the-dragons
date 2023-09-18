@@ -6,6 +6,7 @@ import getRandomInt from './utils';
 
 class Character implements Fighter {
   private generateAttribute = (): number => getRandomInt(1, 10);
+
   private _race: Race;
   private _archetype: Archetypes;
   private _lifePoints: number;
