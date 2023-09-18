@@ -5,6 +5,7 @@ import Archetypes, { Mage, Necromancer, Ranger, Warrior } from './Archetypes';
 import getRandomInt from './utils';
 
 class Character implements Fighter {
+  private generateAttribute = (): number => getRandomInt(1, 10);
   private _race: Race;
   private _archetype: Archetypes;
   private _lifePoints: number;
@@ -15,14 +16,14 @@ class Character implements Fighter {
   private _maxLifePoints: number;
 
   constructor(name: string, raceType?: string, archType?: string) {
+    this._dexterity = this.generateAttribute();
     this._race = this.createRace(raceType, name);
     this._archetype = this.createArchetype(archType, name);
+    this._maxLifePoints = this.getMaxLifPoints();
     this._lifePoints = this.maxLifePoints;
     this._strength = this.generateAttribute();
     this._defense = this.generateAttribute();
-    this._dexterity = this.generateAttribute();
     this._energy = this.generateEnergy(this._archetype);
-    this._maxLifePoints = this.getMaxLifPoints();
   }
 
   private createRace(
@@ -81,7 +82,7 @@ class Character implements Fighter {
   get maxLifePoints(): number {
     return this._maxLifePoints;
   }
-
+  
   get lifePoints(): number {
     return this._lifePoints;
   }
@@ -107,10 +108,6 @@ class Character implements Fighter {
     return undefined;
   }
   
-  attack(enemy: Fighter): void {
-    enemy.receiveDamage(this.strength);
-  }
-  
   receiveDamage(attackPoints: number): number {
     const dmg = attackPoints - this._defense;
     if (dmg > 0) this._lifePoints -= dmg;
@@ -118,31 +115,35 @@ class Character implements Fighter {
     if (this._lifePoints < 1) this._lifePoints = -1;
     return this._lifePoints;
   }
+
+  attack(enemy: Fighter): void {
+    enemy.receiveDamage(this.strength);
+  }
   
-  private generateAttribute = (): number => getRandomInt(1, 10);
-
   levelUp(): void {
-    this._maxLifePoints += this.generateAttribute();
+    const randonMaxLife = this.generateAttribute();
+    const randonStrength = this.generateAttribute();
+    const randonDefense = this.generateAttribute();
+    const randonDexterity = this.generateAttribute();
 
-    if (this.race.maxLifePoints <= this._maxLifePoints) {
-      console.log('entrei no if Max Race', this.race.maxLifePoints);
-      
-      console.log('entrei no if Max Life Points', this._maxLifePoints);
+    this._maxLifePoints += randonMaxLife;
+
+    if (this.race.maxLifePoints < this._maxLifePoints) {
       this._maxLifePoints = this.race.maxLifePoints;
     }
-    console.log('Max Life Points', this._maxLifePoints);
     
     this._lifePoints = this.maxLifePoints;
-    this._strength += this.generateAttribute();
-    this._dexterity += this.generateAttribute();
-    this._defense += this.generateAttribute();
+    this._strength += randonStrength;
+    this._dexterity += randonDexterity;
+    this._defense += randonDefense;
     if (this._energy) this._energy.amount = 10;
   }
 
   special?(enemy: Fighter): void {
     if (this._energy && this._energy.amount >= 4) {
       this._energy.amount -= 4;
-      enemy.receiveDamage((this._strength * this.generateAttribute()) / 2);
+      enemy.receiveDamage(((this.strength
+           * this.generateAttribute()) - enemy.defense) / 2);
     }
   }
 }
