@@ -9,3 +9,4 @@ interface Fighter extends SimpleFighter {
 }
 
 export default Fighter;
+export { SimpleFighter };
